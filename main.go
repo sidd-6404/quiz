@@ -5,24 +5,22 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func main() {
-
-	// csvFilename here is a string pointer so we need to always dereference it before using its value
-	// csvFilename holds the name of the csv file which needs to be open.
-	csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
+	csvFilename := flag.String("csv", "problems.csv", "You can add your own csv file for a quiz in the format or 'Question,Answer'")
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
 	if err != nil {
-		exit(fmt.Sprintf("Failed to open CSV file: %s\n", *csvFilename))
+		exit(fmt.Sprintf("Failed to open CSV file named: %s\n", *csvFilename))
 	}
+
 	r := csv.NewReader(file)
 	lines, err := r.ReadAll()
+
 	if err != nil {
-		exit("Failed to parse the provided CSV file.")
+		exit("Error in parsing the csv file")
 	}
 	problems := parseLines(lines)
 	correct := 0
@@ -34,8 +32,13 @@ func main() {
 			correct++
 		}
 	}
-
 	fmt.Printf("You scored %d out of %d. \n", correct, len(problems))
+
+}
+
+type problem struct {
+	q string
+	a string
 }
 
 func parseLines(lines [][]string) []problem {
@@ -43,15 +46,10 @@ func parseLines(lines [][]string) []problem {
 	for i, line := range lines {
 		ret[i] = problem{
 			q: line[0],
-			a: strings.TrimSpace(line[1]),
+			a: line[1],
 		}
 	}
 	return ret
-}
-
-type problem struct {
-	q string
-	a string
 }
 
 func exit(msg string) {
